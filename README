@@ -1,0 +1,15 @@
+
+brew installed opencv ninja cmake
+
+Then spent a while figuring out what env vars to set.
+
+Then spent a while figuring out why the cargo build kept failing.
+
+Read the docs closer on the https://lib.rs/crates/opencv page and landed on what's in Cargo.toml now.
+
+This generates a binary, but if you look at it with otool you'll see it's linked to a ton of stuff in /usr/local.
+This means it's not trivial to redistribute. Which is fine for me, because this is a toy.
+
+But, if you every wanted to redistribute it you'll have some work to do to pull in all the deps and set DYLD_* 
+vars at runtime. Or however vendoring third party libs works on macos when grownups do it.
+
