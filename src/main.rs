@@ -15,18 +15,25 @@ fn run() -> opencv::Result<()> {
         let mut frame = core::Mat::default()?;
         cam.read(&mut frame)?;
         if frame.size()?.width > 0 {
+            // once we have a frame we grayscale
             let mut gray = core::Mat::default()?;
             imgproc::cvt_color(&frame, &mut gray, imgproc::COLOR_BGR2GRAY, 0)?;
+            // blur it so that the edges are not excessive
+            let mut blur = core::Mat::default()?;
+            imgproc::gaussian_blur(&gray, &mut blur, core::Size::new(5, 5), 5.0 , 5.0, core::BORDER_DEFAULT)?;
+            // run edge detection
             let mut edges = core::Mat::default()?;
-            imgproc::canny(&gray, &mut edges, 70.0, 45.0, 3, true)?;
-
+            imgproc::canny(&blur, &mut edges, 30.0, 40.0, 3, true)?;
+            // invert the image so we have a white background instead of a black one.
             let mut inverted = core::Mat::default()?;
+            // make the masking layer empty so the whole thing is inverted
             let no_mask = core::Mat::default()?;
             core::bitwise_not(&edges, &mut inverted, &no_mask)?;
-//            imgproc::gaussian_blur(src: &dyn core::ToInputArray, dst: &mut dyn core::ToOutputArray, ksize: core::Size, sigma_x: f64, sigma_y: f64, border_type: i32)
+            //show it.
             highgui::imshow(window, &mut inverted)?;
         }
         let key = highgui::wait_key(10)?;
+        //TODO: Wire in keyboard controls to adjust edge detection thresholds as well as toggle everything else.
         if key > 0 && key != 255 {
             break;
         }
