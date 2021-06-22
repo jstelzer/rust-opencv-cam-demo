@@ -23,16 +23,16 @@ struct CammyOpts {
 }
 
 fn invert_frame(frame: &mut core::Mat) -> core::Mat {
-    let mut inverted = core::Mat::default().unwrap();
+    let mut inverted = core::Mat::default();
     // make the masking layer empty so the whole thing is inverted
-    let no_mask = core::Mat::default().unwrap();
+    let no_mask = core::Mat::default();
     core::bitwise_not(frame, &mut inverted, &no_mask).unwrap();
     inverted
 }
 
 fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
     // blur it so that the edges are not excessive
-    let mut blur = core::Mat::default().unwrap();
+    let mut blur = core::Mat::default();
     imgproc::gaussian_blur(
         &frame.clone(),
         &mut blur,
@@ -42,7 +42,7 @@ fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
         core::BORDER_DEFAULT,
     )
     .unwrap();
-    let mut edges = core::Mat::default().unwrap();
+    let mut edges = core::Mat::default();
     imgproc::canny(
         &blur,
         &mut edges,
@@ -50,13 +50,12 @@ fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
         edge_opts.threshold_2,
         3,
         true,
-    )
-    .unwrap();
+    ).unwrap();
     edges
 }
 
 fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
-    let mut gray = core::Mat::default().unwrap();
+    let mut gray = core::Mat::default();
     imgproc::cvt_color(&frame.clone(), &mut gray, imgproc::COLOR_BGR2GRAY, 0).unwrap();
     gray
 }
@@ -77,7 +76,7 @@ fn run() -> opencv::Result<()> {
     let mut canny_flag = true;
     let mut greyscale_flag = true;
     loop {
-        let mut frame = core::Mat::default()?;
+        let mut frame = core::Mat::default();
         cam.read(&mut frame)?;
         if frame.size()?.width > 0 {
             if greyscale_flag {
