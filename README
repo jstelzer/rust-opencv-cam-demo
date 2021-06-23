@@ -13,3 +13,10 @@ This means it's not trivial to redistribute. Which is fine for me, because this 
 But, if you every wanted to redistribute it you'll have some work to do to pull in all the deps and set DYLD_* 
 vars at runtime. Or however vendoring third party libs works on macos when grownups do it.
 
+To compile this source in the env.sh then do a cargo build.
+
+You shouldn't need to set any ENV vars at runtime.
+
+This whole mess liks to stuff in /usr/local by default. So it's more like a unix application than a macos one.
+
+I don't know enough about native mac apps to bundle it up, but it's on my list of things to learn at some point.
