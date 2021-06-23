@@ -1,3 +1,4 @@
+I did this on on a macbook pro without testing on any other platform.
 
 brew installed opencv ninja cmake
 
@@ -17,6 +18,6 @@ To compile this source in the env.sh then do a cargo build.
 
 You shouldn't need to set any ENV vars at runtime.
 
-This whole mess liks to stuff in /usr/local by default. So it's more like a unix application than a macos one.
+This whole mess links to stuff in /usr/local by default. So it's more like a unix application than a macos one.
 
 I don't know enough about native mac apps to bundle it up, but it's on my list of things to learn at some point.
