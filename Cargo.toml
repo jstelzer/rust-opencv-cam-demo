@@ -8,6 +8,6 @@ edition = "2018"
 
 [dependencies]
 
-opencv = "0.53"
+opencv = "0.53.1"
 num-traits = "0.2"
 num-derive = "0.2"
