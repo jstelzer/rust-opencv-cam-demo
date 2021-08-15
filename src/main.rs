@@ -1,8 +1,10 @@
 extern crate opencv;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+
 use opencv::{core, highgui, imgproc, prelude::*, videoio};
 
+//TODO: https://crates.io/crates/keyboard-types way more refined way to do this.
 #[derive(FromPrimitive)]
 enum KeyCodes {
     Esc = 27,
@@ -63,7 +65,7 @@ fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
-    let mut cam = videoio::VideoCapture::new(0, videoio::CAP_ANY)?; // 0 is the default camera
+    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is the default camera
     let opened = videoio::VideoCapture::is_opened(&cam)?;
     let mut edge_thresholds = CammyOpts {
         threshold_1: 30.0,
