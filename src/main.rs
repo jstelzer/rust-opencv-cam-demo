@@ -7,16 +7,22 @@ use opencv::{core, highgui, imgproc, prelude::*, videoio};
 //TODO: https://crates.io/crates/keyboard-types way more refined way to do this.
 #[derive(FromPrimitive)]
 enum KeyCodes {
-    Esc = 27,
-    Space = 32,
-    LowerC = 99,
-    LowerZ = 122,
+    Esc = 27, //quit
+    Space = 32, // toggle canny edges
+    LowerC = 99, // toggle color invert
+    LowerZ = 122, // toggle greyscale
+    LowerD = 100, // reset thresholds to defaults
     //T1
-    Plus = 43,
-    Equals = 61,
+    Plus = 43, // increase edges (threshold 1)
+    Equals = 61, // decrease edges (threshold 1)
     //T2
-    Underscore = 95,
-    Minus = 45,
+    Underscore = 95, // increase (threshold 2)
+    Minus = 45, // decrease (threshold 2)
+}
+
+struct EdgeDefaults {
+    threshold_1: f64,
+    threshold_2: f64,
 }
 
 struct CammyOpts {
@@ -62,14 +68,19 @@ fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
     gray
 }
 
+
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
     let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is the default camera
     let opened = videoio::VideoCapture::is_opened(&cam)?;
-    let mut edge_thresholds = CammyOpts {
+    let default_thresholds = EdgeDefaults {
         threshold_1: 30.0,
         threshold_2: 40.0,
+    };
+    let mut edge_thresholds = CammyOpts {
+        threshold_1: default_thresholds.threshold_1,
+        threshold_2: default_thresholds.threshold_2,
     };
     if !opened {
         panic!("Unable to open default camera!");
@@ -98,6 +109,10 @@ fn run() -> opencv::Result<()> {
             // -1 is when nothing is pressed.
             match FromPrimitive::from_i32(key) {
                 Some(KeyCodes::Esc) => break, //esc key
+                Some(KeyCodes::LowerD) => {
+                    edge_thresholds.threshold_1 = default_thresholds.threshold_1;
+                    edge_thresholds.threshold_2 = default_thresholds.threshold_2;
+                },
                 Some(KeyCodes::LowerC) => {
                     invert_flag = !invert_flag;
                 },
