@@ -7,17 +7,18 @@ use opencv::{core, highgui, imgproc, prelude::*, videoio};
 //TODO: https://crates.io/crates/keyboard-types way more refined way to do this.
 #[derive(FromPrimitive)]
 enum KeyCodes {
-    Esc = 27, //quit
-    Space = 32, // toggle canny edges
-    LowerC = 99, // toggle color invert
+    Esc = 27,     //quit
+    Space = 32,   // toggle canny edges
+    LowerC = 99,  // toggle color invert
+    LowerB = 98,  // toggle gausian blur
     LowerZ = 122, // toggle greyscale
     LowerD = 100, // reset thresholds to defaults
     //T1
-    Plus = 43, // increase edges (threshold 1)
+    Plus = 43,   // increase edges (threshold 1)
     Equals = 61, // decrease edges (threshold 1)
     //T2
     Underscore = 95, // increase (threshold 2)
-    Minus = 45, // decrease (threshold 2)
+    Minus = 45,      // decrease (threshold 2)
 }
 
 struct EdgeDefaults {
@@ -38,8 +39,7 @@ fn invert_frame(frame: &mut core::Mat) -> core::Mat {
     inverted
 }
 
-fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
-    // blur it so that the edges are not excessive
+fn blur_frame(frame: &mut core::Mat) -> core::Mat {
     let mut blur = core::Mat::default();
     imgproc::gaussian_blur(
         &frame.clone(),
@@ -49,16 +49,22 @@ fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
         5.0,
         core::BORDER_DEFAULT,
     )
-    .unwrap();
+        .unwrap();
+    blur
+}
+
+
+fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
     let mut edges = core::Mat::default();
     imgproc::canny(
-        &blur,
+        frame,
         &mut edges,
         edge_opts.threshold_1,
         edge_opts.threshold_2,
         3,
         true,
-    ).unwrap();
+    )
+        .unwrap();
     edges
 }
 
@@ -67,7 +73,6 @@ fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
     imgproc::cvt_color(&frame.clone(), &mut gray, imgproc::COLOR_BGR2GRAY, 0).unwrap();
     gray
 }
-
 
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
@@ -88,6 +93,7 @@ fn run() -> opencv::Result<()> {
     let mut invert_flag = true;
     let mut canny_flag = true;
     let mut greyscale_flag = true;
+    let mut blur_flag = true;
     loop {
         let mut frame = core::Mat::default();
         cam.read(&mut frame)?;
@@ -97,6 +103,9 @@ fn run() -> opencv::Result<()> {
             }
             if canny_flag {
                 frame = canny_frame(&mut frame, &edge_thresholds);
+            }
+            if blur_flag {
+                frame = blur_frame(&mut frame);
             }
             if invert_flag {
                 frame = invert_frame(&mut frame);
@@ -112,28 +121,31 @@ fn run() -> opencv::Result<()> {
                 Some(KeyCodes::LowerD) => {
                     edge_thresholds.threshold_1 = default_thresholds.threshold_1;
                     edge_thresholds.threshold_2 = default_thresholds.threshold_2;
-                },
+                }
+                Some(KeyCodes::LowerB) => {
+                    blur_flag = !blur_flag;
+                }
                 Some(KeyCodes::LowerC) => {
                     invert_flag = !invert_flag;
-                },
+                }
                 Some(KeyCodes::Space) => {
                     canny_flag = !canny_flag;
-                },
+                }
                 Some(KeyCodes::LowerZ) => {
                     greyscale_flag = !greyscale_flag;
-                },
+                }
                 Some(KeyCodes::Plus) => {
                     edge_thresholds.threshold_1 = edge_thresholds.threshold_1 + 1.0;
-                },
+                }
                 Some(KeyCodes::Equals) => {
                     edge_thresholds.threshold_1 = edge_thresholds.threshold_1 - 1.0;
-                },
+                }
                 Some(KeyCodes::Underscore) => {
                     edge_thresholds.threshold_2 = edge_thresholds.threshold_2 + 1.0;
-                },
+                }
                 Some(KeyCodes::Minus) => {
                     edge_thresholds.threshold_2 = edge_thresholds.threshold_2 - 1.0;
-                },
+                }
                 _ => println!("Unmapped key {}", key),
             }
         }
