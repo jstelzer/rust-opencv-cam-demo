@@ -19,14 +19,18 @@ enum KeyCodes {
     //T2
     Underscore = 95, // increase (threshold 2)
     Minus = 45,      // decrease (threshold 2)
+    LowerH = 104,    //help
 }
-
 
 struct CammyOpts {
     threshold_1: f64,
     threshold_2: f64,
 }
 
+fn show_help() -> () {
+    println!("Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds to defaults.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n");
+    ()
+}
 fn invert_frame(frame: &mut core::Mat) -> core::Mat {
     let mut inverted = core::Mat::default();
     // make the masking layer empty so the whole thing is inverted
@@ -45,10 +49,9 @@ fn blur_frame(frame: &mut core::Mat) -> core::Mat {
         5.0,
         core::BORDER_DEFAULT,
     )
-        .unwrap();
+    .unwrap();
     blur
 }
-
 
 fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
     let mut edges = core::Mat::default();
@@ -60,7 +63,7 @@ fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
         3,
         true,
     )
-        .unwrap();
+    .unwrap();
     edges
 }
 
@@ -142,6 +145,7 @@ fn run() -> opencv::Result<()> {
                 Some(KeyCodes::Minus) => {
                     edge_thresholds.threshold_2 = edge_thresholds.threshold_2 - 1.0;
                 }
+                Some(KeyCodes::LowerH) => show_help(),
                 _ => println!("Unmapped key {}", key),
             }
         }
