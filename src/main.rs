@@ -21,10 +21,6 @@ enum KeyCodes {
     Minus = 45,      // decrease (threshold 2)
 }
 
-struct EdgeDefaults {
-    threshold_1: f64,
-    threshold_2: f64,
-}
 
 struct CammyOpts {
     threshold_1: f64,
@@ -79,7 +75,7 @@ fn run() -> opencv::Result<()> {
     highgui::named_window(window, 1)?;
     let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is the default camera
     let opened = videoio::VideoCapture::is_opened(&cam)?;
-    let default_thresholds = EdgeDefaults {
+    let default_thresholds = CammyOpts {
         threshold_1: 30.0,
         threshold_2: 40.0,
     };
