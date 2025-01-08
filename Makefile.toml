@@ -1,0 +1,22 @@
+[env]
+DYLD_FALLBACK_LIBRARY_PATH =  { value = "/usr/local/lib:/opt/homebrew/lib:/Library/Developer/CommandLineTools/usr/lib/", force = true }
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["format"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["build"]
+
+[tasks.release]
+command = "cargo"
+args = ["build", "-r"]
+dependencies = ["format"]
