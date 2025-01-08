@@ -76,7 +76,7 @@ fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
-    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is the default camera
+    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple camera
     let opened = videoio::VideoCapture::is_opened(&cam)?;
     let default_thresholds = CammyOpts {
         threshold_1: 30.0,

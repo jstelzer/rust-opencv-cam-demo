@@ -7,14 +7,17 @@ command = "cargo"
 args = ["fmt"]
 
 [tasks.build]
-command = "cargo"
-args = ["build"]
-dependencies = ["format"]
+dependencies = ["format", "dev", "release"]
 
 [tasks.test]
 command = "cargo"
 args = ["test"]
-dependencies = ["build"]
+dependencies = ["dev", "release"]
+
+[tasks.dev]
+command = "cargo"
+args = ["build"]
+dependencies = ["format"]
 
 [tasks.release]
 command = "cargo"
