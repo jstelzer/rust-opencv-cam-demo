@@ -48,6 +48,7 @@ fn blur_frame(frame: &mut core::Mat) -> core::Mat {
         5.0,
         5.0,
         core::BORDER_DEFAULT,
+        core::AlgorithmHint::ALGO_HINT_DEFAULT,
     )
     .unwrap();
     blur
@@ -69,14 +70,21 @@ fn canny_frame(frame: &mut core::Mat, edge_opts: &CammyOpts) -> core::Mat {
 
 fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
     let mut gray = core::Mat::default();
-    imgproc::cvt_color(&frame.clone(), &mut gray, imgproc::COLOR_BGR2GRAY, 0).unwrap();
+    imgproc::cvt_color(
+        &frame.clone(),
+        &mut gray,
+        imgproc::COLOR_BGR2GRAY,
+        0,
+        core::AlgorithmHint::ALGO_HINT_DEFAULT,
+    )
+    .unwrap();
     gray
 }
 
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
-    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple camera
+    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
     let opened = videoio::VideoCapture::is_opened(&cam)?;
     let default_thresholds = CammyOpts {
         threshold_1: 30.0,
