@@ -25,3 +25,8 @@ I don't know enough about native mac apps to bundle it up, but it's on my list o
 
 Turns out this works on linux just fine too. It's going to link to the regular opencv libs, and I have used it on 
 my arch box with a simple logitech webcam just fine.
+
+Streaming was pretty straight forward.
+https://interfacinglinux.com/2024/01/09/obs-virtual-webcam-on-linux/
+
+tldr: install v4l2loopback-dkms

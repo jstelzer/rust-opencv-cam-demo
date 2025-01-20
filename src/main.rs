@@ -1,5 +1,7 @@
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use serde::{Deserialize, Serialize};
+use std::{fs, path::Path};
 
 use opencv::{core, highgui, imgproc, prelude::*, videoio};
 
@@ -21,16 +23,24 @@ enum KeyCodes {
     LowerH = 104,    //help
 }
 
+#[derive(Serialize, Deserialize)]
 struct CammyOpts {
     threshold_1: f64,
     threshold_2: f64,
 }
 
+#[derive(Serialize, Deserialize)]
 struct FrameFlags {
     invert: bool,
     canny: bool,
     greyscale: bool,
     blur: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+struct AppConfig {
+    edge_thresholds: CammyOpts,
+    flags: FrameFlags,
 }
 
 fn display_help_overlay(window: &str) -> opencv::Result<()> {
@@ -171,6 +181,16 @@ fn run() -> opencv::Result<()> {
         greyscale: true,
         blur: true,
     };
+    let config_dir = format!("{}/.config/cannycam", std::env::var("HOME").unwrap());
+    let config_file = format!("{}/settings.json", config_dir);
+    if Path::new(&config_file).exists() {
+        if let Ok(contents) = fs::read_to_string(&config_file) {
+            if let Ok(saved) = serde_json::from_str::<AppConfig>(&contents) {
+                edge_thresholds = saved.edge_thresholds;
+                flags = saved.flags;
+            }
+        }
+    }
     if !opened {
         return Err(opencv::Error::new(
             opencv::core::StsError,
@@ -190,6 +210,19 @@ fn run() -> opencv::Result<()> {
                 break;
             }
         }
+    }
+    let new_config = AppConfig {
+        edge_thresholds,
+        flags,
+    };
+    fs::create_dir_all(&config_dir).ok();
+    match serde_json::to_string_pretty(&new_config) {
+        Ok(json_str) => {
+            if let Err(e) = fs::write(&config_file, json_str) {
+                eprintln!("Warning: Could not save settings: {}", e);
+            }
+        }
+        Err(e) => eprintln!("Warning: Could not serialize settings: {}", e),
     }
     Ok(())
 }
