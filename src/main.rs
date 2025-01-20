@@ -104,6 +104,48 @@ fn process_frame(frame: &mut core::Mat, opts: &CammyOpts, flags: &FrameFlags) ->
     result
 }
 
+fn handle_key_press(
+    key: i32,
+    edge_thresholds: &mut CammyOpts,
+    default_thresholds: &CammyOpts,
+    flags: &mut FrameFlags,
+) -> bool {
+    match FromPrimitive::from_i32(key) {
+        Some(KeyCodes::Esc) => return false,
+        Some(KeyCodes::LowerD) => {
+            edge_thresholds.threshold_1 = default_thresholds.threshold_1;
+            edge_thresholds.threshold_2 = default_thresholds.threshold_2;
+        }
+        Some(KeyCodes::LowerB) => {
+            flags.blur = !flags.blur;
+        }
+        Some(KeyCodes::LowerC) => {
+            flags.invert = !flags.invert;
+        }
+        Some(KeyCodes::Space) => {
+            flags.canny = !flags.canny;
+        }
+        Some(KeyCodes::LowerZ) => {
+            flags.greyscale = !flags.greyscale;
+        }
+        Some(KeyCodes::Plus) => {
+            edge_thresholds.threshold_1 += 1.0;
+        }
+        Some(KeyCodes::Equals) => {
+            edge_thresholds.threshold_1 -= 1.0;
+        }
+        Some(KeyCodes::Underscore) => {
+            edge_thresholds.threshold_2 += 1.0;
+        }
+        Some(KeyCodes::Minus) => {
+            edge_thresholds.threshold_2 -= 1.0;
+        }
+        Some(KeyCodes::LowerH) => print_help(),
+        _ => println!("Unmapped key {}", key),
+    }
+    true
+}
+
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
@@ -138,39 +180,8 @@ fn run() -> opencv::Result<()> {
         }
         let key = highgui::wait_key(10)?;
         if key > -1 {
-            // -1 is when nothing is pressed.
-            match FromPrimitive::from_i32(key) {
-                Some(KeyCodes::Esc) => break, //esc key
-                Some(KeyCodes::LowerD) => {
-                    edge_thresholds.threshold_1 = default_thresholds.threshold_1;
-                    edge_thresholds.threshold_2 = default_thresholds.threshold_2;
-                }
-                Some(KeyCodes::LowerB) => {
-                    flags.blur = !flags.blur;
-                }
-                Some(KeyCodes::LowerC) => {
-                    flags.invert = !flags.invert;
-                }
-                Some(KeyCodes::Space) => {
-                    flags.canny = !flags.canny;
-                }
-                Some(KeyCodes::LowerZ) => {
-                    flags.greyscale = !flags.greyscale;
-                }
-                Some(KeyCodes::Plus) => {
-                    edge_thresholds.threshold_1 = edge_thresholds.threshold_1 + 1.0;
-                }
-                Some(KeyCodes::Equals) => {
-                    edge_thresholds.threshold_1 = edge_thresholds.threshold_1 - 1.0;
-                }
-                Some(KeyCodes::Underscore) => {
-                    edge_thresholds.threshold_2 = edge_thresholds.threshold_2 + 1.0;
-                }
-                Some(KeyCodes::Minus) => {
-                    edge_thresholds.threshold_2 = edge_thresholds.threshold_2 - 1.0;
-                }
-                Some(KeyCodes::LowerH) => print_help(),
-                _ => println!("Unmapped key {}", key),
+            if !handle_key_press(key, &mut edge_thresholds, &default_thresholds, &mut flags) {
+                break;
             }
         }
     }
