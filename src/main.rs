@@ -172,7 +172,7 @@ fn run() -> opencv::Result<()> {
             opencv::core::StsError,
             "Unable to open default camera!",
         ));
-    }    
+    }
     let default_thresholds = CammyOpts {
         threshold_1: 30.0,
         threshold_2: 40.0,
