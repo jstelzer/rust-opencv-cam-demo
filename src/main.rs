@@ -167,6 +167,12 @@ fn run() -> opencv::Result<()> {
     highgui::named_window(window, 1)?;
     let mut cam = videoio::VideoCapture::new(0, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
     let opened = videoio::VideoCapture::is_opened(&cam)?;
+    if !opened {
+        return Err(opencv::Error::new(
+            opencv::core::StsError,
+            "Unable to open default camera!",
+        ));
+    }    
     let default_thresholds = CammyOpts {
         threshold_1: 30.0,
         threshold_2: 40.0,
@@ -190,12 +196,6 @@ fn run() -> opencv::Result<()> {
                 flags = saved.flags;
             }
         }
-    }
-    if !opened {
-        return Err(opencv::Error::new(
-            opencv::core::StsError,
-            "Unable to open default camera!",
-        ));
     }
     loop {
         let mut frame = core::Mat::default();
