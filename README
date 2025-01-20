@@ -21,3 +21,7 @@ You shouldn't need to set any ENV vars at runtime.
 This whole mess links to stuff in /usr/local by default. So it's more like a unix application than a macos one.
 
 I don't know enough about native mac apps to bundle it up, but it's on my list of things to learn at some point.
+
+
+Turns out this works on linux just fine too. It's going to link to the regular opencv libs, and I have used it on 
+my arch box with a simple logitech webcam just fine.
