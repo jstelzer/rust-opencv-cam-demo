@@ -33,8 +33,10 @@ struct FrameFlags {
     blur: bool,
 }
 
-fn print_help() {
-    println!("Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds to defaults.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n");
+fn display_help_overlay(window: &str) -> opencv::Result<()> {
+    let help_text = "Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n";
+    highgui::display_overlay(window, help_text, 5000)?;
+    Ok(())
 }
 
 fn invert_frame(frame: &mut core::Mat) -> core::Mat {
@@ -140,7 +142,11 @@ fn handle_key_press(
         Some(KeyCodes::Minus) => {
             edge_thresholds.threshold_2 -= 1.0;
         }
-        Some(KeyCodes::LowerH) => print_help(),
+        Some(KeyCodes::LowerH) => {
+            if let Err(e) = display_help_overlay("Silly image transform") {
+                println!("Error displaying help: {}", e);
+            }
+        }
         _ => println!("Unmapped key {}", key),
     }
     true
