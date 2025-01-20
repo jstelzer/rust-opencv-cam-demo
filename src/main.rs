@@ -1,4 +1,3 @@
-extern crate opencv;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
@@ -27,10 +26,17 @@ struct CammyOpts {
     threshold_2: f64,
 }
 
-fn show_help() -> () {
-    println!("Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds to defaults.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n");
-    ()
+struct FrameFlags {
+    invert: bool,
+    canny: bool,
+    greyscale: bool,
+    blur: bool,
 }
+
+fn print_help() {
+    println!("Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds to defaults.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n");
+}
+
 fn invert_frame(frame: &mut core::Mat) -> core::Mat {
     let mut inverted = core::Mat::default();
     // make the masking layer empty so the whole thing is inverted
@@ -81,10 +87,27 @@ fn greyscale_frame(frame: &mut core::Mat) -> core::Mat {
     gray
 }
 
+fn process_frame(frame: &mut core::Mat, opts: &CammyOpts, flags: &FrameFlags) -> core::Mat {
+    let mut result = frame.clone();
+    if flags.greyscale {
+        result = greyscale_frame(&mut result);
+    }
+    if flags.canny {
+        result = canny_frame(&mut result, opts);
+    }
+    if flags.blur {
+        result = blur_frame(&mut result);
+    }
+    if flags.invert {
+        result = invert_frame(&mut result);
+    }
+    result
+}
+
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
     highgui::named_window(window, 1)?;
-    let mut cam = videoio::VideoCapture::new(1, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
+    let mut cam = videoio::VideoCapture::new(0, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
     let opened = videoio::VideoCapture::is_opened(&cam)?;
     let default_thresholds = CammyOpts {
         threshold_1: 30.0,
@@ -94,31 +117,24 @@ fn run() -> opencv::Result<()> {
         threshold_1: default_thresholds.threshold_1,
         threshold_2: default_thresholds.threshold_2,
     };
+    let mut flags = FrameFlags {
+        invert: true,
+        canny: true,
+        greyscale: true,
+        blur: true,
+    };
     if !opened {
-        panic!("Unable to open default camera!");
+        return Err(opencv::Error::new(
+            opencv::core::StsError,
+            "Unable to open default camera!",
+        ));
     }
-    let mut invert_flag = true;
-    let mut canny_flag = true;
-    let mut greyscale_flag = true;
-    let mut blur_flag = true;
     loop {
         let mut frame = core::Mat::default();
         cam.read(&mut frame)?;
         if frame.size()?.width > 0 {
-            if greyscale_flag {
-                frame = greyscale_frame(&mut frame);
-            }
-            if canny_flag {
-                frame = canny_frame(&mut frame, &edge_thresholds);
-            }
-            if blur_flag {
-                frame = blur_frame(&mut frame);
-            }
-            if invert_flag {
-                frame = invert_frame(&mut frame);
-            }
-            //show it.
-            highgui::imshow(window, &mut frame)?;
+            let processed = process_frame(&mut frame, &edge_thresholds, &flags);
+            highgui::imshow(window, &processed)?;
         }
         let key = highgui::wait_key(10)?;
         if key > -1 {
@@ -130,16 +146,16 @@ fn run() -> opencv::Result<()> {
                     edge_thresholds.threshold_2 = default_thresholds.threshold_2;
                 }
                 Some(KeyCodes::LowerB) => {
-                    blur_flag = !blur_flag;
+                    flags.blur = !flags.blur;
                 }
                 Some(KeyCodes::LowerC) => {
-                    invert_flag = !invert_flag;
+                    flags.invert = !flags.invert;
                 }
                 Some(KeyCodes::Space) => {
-                    canny_flag = !canny_flag;
+                    flags.canny = !flags.canny;
                 }
                 Some(KeyCodes::LowerZ) => {
-                    greyscale_flag = !greyscale_flag;
+                    flags.greyscale = !flags.greyscale;
                 }
                 Some(KeyCodes::Plus) => {
                     edge_thresholds.threshold_1 = edge_thresholds.threshold_1 + 1.0;
@@ -153,7 +169,7 @@ fn run() -> opencv::Result<()> {
                 Some(KeyCodes::Minus) => {
                     edge_thresholds.threshold_2 = edge_thresholds.threshold_2 - 1.0;
                 }
-                Some(KeyCodes::LowerH) => show_help(),
+                Some(KeyCodes::LowerH) => print_help(),
                 _ => println!("Unmapped key {}", key),
             }
         }
@@ -161,6 +177,6 @@ fn run() -> opencv::Result<()> {
     Ok(())
 }
 
-fn main() {
-    run().unwrap()
+fn main() -> opencv::Result<()> {
+    run()
 }
