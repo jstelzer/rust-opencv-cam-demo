@@ -43,6 +43,19 @@ struct AppConfig {
     flags: FrameFlags,
 }
 
+// on mac: 0 phone, 1 logitech, 2 is apple. When the logitech isn't plugged in 1 is builtin apple camera.
+//         on mac, I prefer the logitech then the builtin camera generally so just default to 1 and use the best available.
+// on linux: when cam is plugged in it's zero. or if its not plugged in this program will crash.
+#[cfg(target_os = "linux")]
+fn get_camera_offset() -> i32 {
+    return 0;
+}
+
+#[cfg(target_os = "macos")]
+fn get_camera_offset() -> i32 {
+    return 1;
+}
+
 fn display_help_overlay(window: &str) -> opencv::Result<()> {
     let help_text = "Key bindings\nEsc: quit.\nSpace: toggle canny edges.\nc: toggle color invert.\nb: toggle blur.\nz: toggle greyscale.\nd: reset thresholds.\n+: increase t1.\n=: decrease t1.\n._: increase t2.\n-: decrease t2.\n";
     highgui::display_overlay(window, help_text, 5000)?;
@@ -164,8 +177,10 @@ fn handle_key_press(
 
 fn run() -> opencv::Result<()> {
     let window = "Silly image transform";
-    highgui::named_window(window, 1)?;
-    let mut cam = videoio::VideoCapture::new(0, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
+    // Replace this with WINDOW_NORMAL if you want the fancy new toolbar.
+    highgui::named_window(window, highgui::WINDOW_GUI_NORMAL)?;
+    let camera_offset = get_camera_offset();
+    let mut cam = videoio::VideoCapture::new(camera_offset, videoio::CAP_ANY)?; // 0 is my phone, 1 is logitech, 2 is apple cameracd
     let opened = videoio::VideoCapture::is_opened(&cam)?;
     if !opened {
         return Err(opencv::Error::new(
