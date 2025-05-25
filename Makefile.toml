@@ -10,17 +10,14 @@ args = ["fmt"]
 CFLAGS = "-I/opt/QtOpenCV/include"
 LDFLAGS = "-L/opt/QtOpenCV/lib -lopencv_core -lopencv_imgproc -lopencv_highgui"
 LD_LIBRARY_PATH = "/opt/QtOpenCV/lib"
-PKG_CONFIG_PATH = "/opt/QtOpenCV/lib/pkgconfig:/opt/QtOpenCV/share/pkgconfig"
 # OpenCV crate environment variables
-OPENCV_INCLUDE_PATH = "/opt/QtOpenCV/include"
-OPENCV_LIB_PATH = "/opt/QtOpenCV/lib"
-OPENCV_LINK_LIBS = "opencv_core:opencv_imgproc:opencv_highgui"
+OpenCV_DIR = "/opt/QtOpenCV/lib/cmake/opencv4"
+
 
 [env.macos]
 CFLAGS = "-I/opt/QtOpenCV/include"
 LDFLAGS = "-L/opt/QtOpenCV/lib -lopencv_core -lopencv_imgproc -lopencv_highgui"
 DYLD_LIBRARY_PATH = "/opt/QtOpenCV/lib"
-PKG_CONFIG_PATH = "/opt/QtOpenCV/lib/pkgconfig:/opt/QtOpenCV/share/pkgconfig"
 # OpenCV crate environment variables
 OpenCV_DIR="/opt/QtOpenCV/lib/cmake/opencv4"
 
